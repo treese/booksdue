@@ -52,25 +52,25 @@ class MlnFetcher(object):
 	br["code"] = self.account
 	br["pin"] = self.pin
 
-	br.submit()
-	link = br.find_link(text_regex=r"checked out").url
-	response = br.open(MlnFetcher.urlbase + link)
+	response = br.submit()
 	data = response.read()
 
 	# The HTML on this page isn't very good, so we pull out
 	# the important table with a regexp, and then parse the HTML.
 
 	match = sre.search('\<table[^>]*patFunc".*</table>', data, sre.DOTALL)
-	parser = MyTableParser()
-	parser.feed(match.group(0))
 
 	booklist = []
-	for book in parser.tabledata[1:]:
-	    title = string.split(book[0], '/')[0].strip()
-	    xdate = book[4].split()[1].split('-')
-	    duedate = datetime.datetime(2000 + int(xdate[2]), int(xdate[0]),
-					int(xdate[1]))
-	    booklist.append((duedate, title))
+        if match != None:
+            parser = MyTableParser()
+            parser.feed(match.group(0))
+
+            for book in parser.tabledata[1:]:
+                title = string.split(book[0], '/')[0].strip()
+                xdate = book[4].split()[1].split('-')
+                duedate = datetime.datetime(2000 + int(xdate[2]), int(xdate[0]),
+                                            int(xdate[1]))
+                booklist.append((duedate, title))
 	return booklist
 
 # Config file is one account per line, no comments.
