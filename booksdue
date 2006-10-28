@@ -84,6 +84,20 @@ def read_config(filename):
 	accounts.append(acct)
     return accounts
 
+def compareNames(book1, book2):
+    (duedate1, title1) = book1
+    (duedate2, title2) = book2
+    return cmp(title1, title2)
+
+def compareDates(book1, book2):
+    (duedate1, title1) = book1
+    (duedate2, title2) = book2
+    if duedate1 < duedate2:
+	return -1
+    if duedate1 == duedate2:
+	return 0
+    return 1
+
 def main():
     usage = "%prog [options]"
     defaultconfig = ".mln.conf"
@@ -91,10 +105,10 @@ def main():
     cmdparser = OptionParser(usage)
     cmdparser.add_option("-w", "--warn", type="int", dest="warndays",
 			help="Print warning for books due in N days", default=100)
-    #cmdparser.add_option("-t", "--by-time", action="store_true", dest="bytime",
-    #help="Sort list by due date", default=True)
-    #cmdparser.add_option("-n", "--by-name", action="store_true", dest="byname",
-    #help="Sort list by due date", default=False)
+    cmdparser.add_option("-d", "--by-date", action="store_true", dest="bydate",
+    help="Sort list by due date", default=True)
+    cmdparser.add_option("-n", "--by-name", action="store_false", dest="bydate",
+    help="Sort list by name")
     cmdparser.add_option("-c", "--config", type="string", dest="config",
 			help="Configuration file to use; default is ~/" +
 			defaultconfig, default=config)
@@ -108,7 +122,12 @@ def main():
 	# Print by  name
 	print acct[0]
 	print "----------"
-	for book in fetcher.fetch():
+	booklist = fetcher.fetch()
+	if options.bydate:
+	    booklist.sort(compareDates)
+	else:
+	    booklist.sort(compareNames)
+	for book in booklist:
 	    (duedate,title) = book
 	    now = datetime.datetime.today()
 	    if duedate - now < datetime.timedelta(options.warndays):
