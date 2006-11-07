@@ -8,6 +8,7 @@ import os
 import sys
 import sre
 import string
+import logging
 
 class MyTableParser(HTMLParser):
     def __init__(self):
@@ -55,18 +56,27 @@ class MlnFetcher(object):
 	response = br.submit()
 	data = response.read()
 
+        # If there are no books checked out, and there are fines,
+        # then punt.
+
+        if data.find("0 Items currently checked out") >= 0 and data.find("FINES") >= 0:
+            return [(datetime.datetime.today(), "THERE ARE FINES")]
+        
+
 	# The HTML on this page isn't very good, so we pull out
 	# the important table with a regexp, and then parse the HTML.
 
 	match = sre.search('\<table[^>]*patFunc".*</table>', data, sre.DOTALL)
-
+        
 	booklist = []
         if match != None:
             parser = MyTableParser()
-            parser.feed(match.group(0))
+            input = match.group(0).replace("& ", "and ")
+            parser.feed(input)
 
             for book in parser.tabledata[1:]:
                 title = string.split(book[0], '/')[0].strip()
+                logging.debug("Book info: %s" % str(book))
                 xdate = book[4].split()[1].split('-')
                 duedate = datetime.datetime(2000 + int(xdate[2]), int(xdate[0]),
                                             int(xdate[1]))
@@ -106,15 +116,20 @@ def main():
     cmdparser.add_option("-w", "--warn", type="int", dest="warndays",
 			help="Print warning for books due in N days", default=100)
     cmdparser.add_option("-d", "--by-date", action="store_true", dest="bydate",
-    help="Sort list by due date", default=True)
+                         help="Sort list by due date", default=True)
     cmdparser.add_option("-n", "--by-name", action="store_false", dest="bydate",
-    help="Sort list by name")
+                         help="Sort list by name")
     cmdparser.add_option("-c", "--config", type="string", dest="config",
 			help="Configuration file to use; default is ~/" +
 			defaultconfig, default=config)
+    cmdparser.add_option("-z", "--debug", action="store_true", dest="debug",
+                         help="Enable debugging", default=False)
+    
     (options, args) = cmdparser.parse_args()
     if len(args) != 0:
-	parser.error("Unknown arguments")
+	cmdparser.error("Unknown arguments")
+    if options.debug:
+        logging.basicConfig(level=logging.DEBUG)
 
     accounts = read_config(options.config)
     for acct in accounts:
