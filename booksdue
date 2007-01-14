@@ -78,7 +78,8 @@ class MlnFetcher(object):
                 title = string.split(book[0], '/')[0].strip()
                 logging.debug("Book info: %s" % str(book))
                 xdate = book[4].split()[1].split('-')
-                duedate = datetime.datetime(2000 + int(xdate[2]), int(xdate[0]),
+                year = xdate[1][0:2]
+                duedate = datetime.datetime(2000 + int(year), int(xdate[0]),
                                             int(xdate[1]))
                 booklist.append((duedate, title))
 	return booklist
