@@ -6,7 +6,7 @@ from optparse import OptionParser
 import datetime
 import os
 import sys
-import sre
+import re
 import string
 import logging
 
@@ -66,7 +66,7 @@ class MlnFetcher(object):
 	# The HTML on this page isn't very good, so we pull out
 	# the important table with a regexp, and then parse the HTML.
 
-	match = sre.search('\<table[^>]*patFunc".*</table>', data, sre.DOTALL)
+	match = re.search('\<table[^>]*patFunc".*</table>', data, re.DOTALL)
         
 	booklist = []
         if match != None:
@@ -78,9 +78,11 @@ class MlnFetcher(object):
                 title = string.split(book[0], '/')[0].strip()
                 logging.debug("Book info: %s" % str(book))
                 xdate = book[4].split()[1].split('-')
-                year = xdate[1][0:2]
+                year = xdate[2][0:2]
+		logging.debug("xdate %s year %s" % (xdate, year))
                 duedate = datetime.datetime(2000 + int(year), int(xdate[0]),
                                             int(xdate[1]))
+		logging.debug("Book parsed: %s %s" % (duedate, title))
                 booklist.append((duedate, title))
 	return booklist
 
@@ -139,6 +141,7 @@ def main():
 	print acct[0]
 	print "----------"
 	booklist = fetcher.fetch()
+	logging.debug(booklist)
 	if options.bydate:
 	    booklist.sort(compareDates)
 	else:
