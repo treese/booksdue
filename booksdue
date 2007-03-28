@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+#
+# Download a list of books due from the Minuteman Library Network
+# in Massachusetts.
+#
+# Win Treese
+# treese@acm.org
+#
+# Last modified on Tue Mar 27 21:47:12 EDT 2007 by treese
 
 from mechanize import Browser
 from HTMLParser import HTMLParser
@@ -9,6 +17,9 @@ import sys
 import re
 import string
 import logging
+
+# Main configuration
+urlbase = "https://library.minlib.net"
 
 class MyTableParser(HTMLParser):
     def __init__(self):
@@ -39,7 +50,6 @@ class MyTableParser(HTMLParser):
 	    self.incell = 0
 
 class MlnFetcher(object):
-    urlbase = "https://library.minlib.net"
     def __init__(self, account, pin):
 	super(MlnFetcher, self).__init__()
 	self.account = account
@@ -47,7 +57,7 @@ class MlnFetcher(object):
     def fetch(self):
 	br = Browser()
 	br.set_handle_robots(False)	# Don't worry about robots.txt for this.
-	response = br.open(MlnFetcher.urlbase + "/patroninfo/")
+	response = br.open(urlbase + "/patroninfo/")
 	assert br.viewing_html()
 	br.select_form(nr = 0)
 	br["code"] = self.account
@@ -134,6 +144,9 @@ def main():
     if options.debug:
         logging.basicConfig(level=logging.DEBUG)
 
+    # Print the base URL as a handy link to click on in an email.
+    print "\n%s\n\n" % (urlbase)
+    
     accounts = read_config(options.config)
     for acct in accounts:
 	fetcher = MlnFetcher(acct[1], acct[2])
