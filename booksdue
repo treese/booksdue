@@ -6,7 +6,7 @@
 # Win Treese
 # treese@acm.org
 #
-# Last modified on Tue Mar 27 21:47:12 EDT 2007 by treese
+# Last modified on Sun Aug 12 01:58:06 EDT 2007 by treese
 
 from mechanize import Browser
 from HTMLParser import HTMLParser
@@ -99,12 +99,14 @@ class MlnFetcher(object):
 # Config file is one account per line, no comments.
 # name account# pin
 
-def read_config(filename):
+def read_config(filename, args):
     accounts = []
+    args = [x.lower() for x in args]
     f = open(filename)
     for x in f.readlines():
 	acct = x.split()
-	accounts.append(acct)
+        if len(args) == 0 or acct[0].lower() in args:
+            accounts.append(acct)
     return accounts
 
 def compareNames(book1, book2):
@@ -122,7 +124,7 @@ def compareDates(book1, book2):
     return 1
 
 def main():
-    usage = "%prog [options]"
+    usage = "%prog [options] [accounts]"
     defaultconfig = ".mln.conf"
     config = os.getenv("HOME") + "/" + defaultconfig
     cmdparser = OptionParser(usage)
@@ -139,15 +141,13 @@ def main():
                          help="Enable debugging", default=False)
     
     (options, args) = cmdparser.parse_args()
-    if len(args) != 0:
-	cmdparser.error("Unknown arguments")
     if options.debug:
         logging.basicConfig(level=logging.DEBUG)
 
     # Print the base URL as a handy link to click on in an email.
     print "\n%s\n\n" % (urlbase)
     
-    accounts = read_config(options.config)
+    accounts = read_config(options.config, args)
     for acct in accounts:
 	fetcher = MlnFetcher(acct[1], acct[2])
 	# Print by  name
