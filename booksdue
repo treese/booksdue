@@ -6,7 +6,7 @@
 # Win Treese
 # treese@acm.org
 #
-# Last modified on Sun Aug 12 01:58:06 EDT 2007 by treese
+# Last modified on Sat Jul  5 22:24:03 EDT 2008 by treese
 
 from mechanize import Browser
 from HTMLParser import HTMLParser
@@ -57,7 +57,13 @@ class MlnFetcher(object):
     def fetch(self):
 	br = Browser()
 	br.set_handle_robots(False)	# Don't worry about robots.txt for this.
-	response = br.open(urlbase + "/patroninfo/")
+        myurl = urlbase + "/patroninfo/"
+        try:
+            response = br.open(myurl)
+        except urllib2.URLError, (errno, errmsg):
+            sys.stderr.write('Cannot open URL %s: %s' % (myurl, errmsg))
+            sys.exit(-1)
+            
 	assert br.viewing_html()
 	br.select_form(nr = 0)
 	br["code"] = self.account
@@ -69,8 +75,8 @@ class MlnFetcher(object):
         # If there are no books checked out, and there are fines,
         # then punt.
 
-        if data.find("0 Items currently checked out") >= 0 and data.find("FINES") >= 0:
-            return [(datetime.datetime.today(), "THERE ARE FINES")]
+        if (data.find("0 Items currently checked out") >= 0):
+            return [(None, 'Nothing checked out')]
         
 
 	# The HTML on this page isn't very good, so we pull out
@@ -154,16 +160,20 @@ def main():
 	print acct[0]
 	print "----------"
 	booklist = fetcher.fetch()
-	logging.debug(booklist)
-	if options.bydate:
-	    booklist.sort(compareDates)
-	else:
-	    booklist.sort(compareNames)
+        logging.debug(booklist)
+        if len(booklist) > 1:
+            if options.bydate:
+                booklist.sort(compareDates)
+            else:
+                booklist.sort(compareNames)
 	for book in booklist:
 	    (duedate,title) = book
-	    now = datetime.datetime.today()
-	    if duedate - now < datetime.timedelta(options.warndays):
-		print duedate.strftime('%m/%d/%Y'), title
+            if duedate == None:
+                print title
+            else:
+                now = datetime.datetime.today()
+                if duedate - now < datetime.timedelta(options.warndays):
+                    print duedate.strftime('%m/%d/%Y'), title
 	print ""
 
 if __name__ == "__main__":
