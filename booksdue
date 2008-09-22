@@ -6,7 +6,7 @@
 # Win Treese
 # treese@acm.org
 #
-# Last modified on Sat Jul  5 22:24:03 EDT 2008 by treese
+# Last modified on Mon Sep 22 10:57:36 EDT 2008 by treese
 
 from mechanize import Browser
 from HTMLParser import HTMLParser
@@ -79,7 +79,7 @@ class MlnFetcher(object):
         if (data.find('0 Items currently checked out') >= 0):
             return [(None, 'Nothing checked out')]
 
-        if (data.find('the information you submitted was invalid')):
+        if (data.find('the information you submitted was invalid') >= 0 ):
             return [(None, 'Bad account number or password')]
 
 	# The HTML on this page isn't very good, so we pull out
