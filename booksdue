@@ -71,13 +71,16 @@ class MlnFetcher(object):
 
 	response = br.submit()
 	data = response.read()
+        logging.debug(data)
 
         # If there are no books checked out, and there are fines,
         # then punt.
 
-        if (data.find("0 Items currently checked out") >= 0):
+        if (data.find('0 Items currently checked out') >= 0):
             return [(None, 'Nothing checked out')]
-        
+
+        if (data.find('the information you submitted was invalid')):
+            return [(None, 'Bad account number or password')]
 
 	# The HTML on this page isn't very good, so we pull out
 	# the important table with a regexp, and then parse the HTML.
