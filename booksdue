@@ -6,7 +6,7 @@
 # Win Treese
 # treese@acm.org
 #
-# Last modified on Mon Sep 22 10:57:36 EDT 2008 by treese
+# Last modified on Mon Oct 13 22:15:26 EDT 2008 by treese
 
 from mechanize import Browser
 from HTMLParser import HTMLParser
@@ -96,7 +96,7 @@ class MlnFetcher(object):
             for book in parser.tabledata[1:]:
                 title = string.split(book[0], '/')[0].strip()
                 logging.debug("Book info: %s" % str(book))
-                xdate = book[4].split()[1].split('-')
+                xdate = book[8].split()[1].split('-')
                 year = xdate[2][0:2]
 		logging.debug("xdate %s year %s" % (xdate, year))
                 duedate = datetime.datetime(2000 + int(year), int(xdate[0]),
