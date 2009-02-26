@@ -6,9 +6,9 @@
 # Win Treese
 # treese@acm.org
 #
-# Last modified on Mon Oct 13 22:15:26 EDT 2008 by treese
+# Last modified on Thu Feb 26 11:59:20 EST 2009 by treese
 
-from mechanize import Browser
+import  mechanize
 from HTMLParser import HTMLParser
 from optparse import OptionParser
 import datetime
@@ -55,12 +55,12 @@ class MlnFetcher(object):
 	self.account = account
 	self.pin = pin
     def fetch(self):
-	br = Browser()
+	br = mechanize.Browser()
 	br.set_handle_robots(False)	# Don't worry about robots.txt for this.
         myurl = urlbase + "/patroninfo/"
         try:
             response = br.open(myurl)
-        except urllib2.URLError, (errno, errmsg):
+        except mechanize.URLError, (errno, errmsg):
             sys.stderr.write('Cannot open URL %s: %s' % (myurl, errmsg))
             sys.exit(-1)
             
