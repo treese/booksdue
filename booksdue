@@ -6,7 +6,7 @@
 # Win Treese
 # treese@acm.org
 #
-# Last modified on Fri Apr  3 19:27:17 EDT 2009 by treese
+# Last modified on Fri Apr  3 21:45:11 EDT 2009 by treese
 
 import  mechanize
 from HTMLParser import HTMLParser
@@ -102,7 +102,7 @@ class MlnFetcher(object):
             parser.feed(input)
 
             if nocheckouts:
-                print len(parser.tabledata) - 2, "books on hold"
+                print len(parser.tabledata) - 2, "books requested"
                 return [(None, 'Nothing checked out')]
             for book in parser.tabledata[1:]:
                 title = string.split(book[0], '/')[0].strip()
