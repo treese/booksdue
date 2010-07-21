@@ -23,31 +23,44 @@ urlbase = "https://library.minlib.net"
 
 class MyTableParser(HTMLParser):
     def __init__(self):
-	self.intable = 0
-	self.incell = 0
-	self.inrow = 0
+	self.intable = False
+	self.incell = False
+	self.inrow = False
+        self.inspan = False
+        self.label = False
+        self.celldata = ''
 	self.rowdata = []
 	self.tabledata = []
 	HTMLParser.__init__(self)
     def handle_starttag(self, tag, attrs):
 	if tag == 'table':
-	    self.intable = 1
-	if tag == 'tr':
-	    self.inrow = 1
-	if tag == 'td':
-	    self.incell = 1
+	    self.intable = True
+	elif tag == 'tr':
+	    self.inrow = True
+	elif tag == 'td':
+	    self.incell = True
+        elif tag == 'span':
+            self.inspan = True
+        elif tag == 'label':
+            self.label = True
     def handle_data(self, data):
-	if self.incell == 1:
-	    self.rowdata.append(string.strip(data))
+	if self.incell:
+            self.celldata = self.celldata + ' ' + data.strip()
     def handle_endtag(self, tag):
 	if tag == 'table':
-	    self.intable = 0
-	if tag == 'tr':
-	    self.inrow = 0
+	    self.intable = False
+	elif tag == 'tr':
+	    self.inrow = False
 	    self.tabledata.append(self.rowdata)
 	    self.rowdata = []
-	if tag == 'td':
-	    self.incell = 0
+	elif tag == 'td':
+	    self.incell = False
+            self.rowdata.append(self.celldata)
+            self.celldata = ''
+        elif tag == 'span':
+            self.inspan = False
+        elif tag == 'label':
+            self.label = False
 
 class MlnFetcher(object):
     def __init__(self, account, pin):
@@ -105,9 +118,9 @@ class MlnFetcher(object):
                 print len(parser.tabledata) - 2, "books requested"
                 return [(None, 'Nothing checked out')]
             for book in parser.tabledata[1:]:
-                title = string.split(book[0], '/')[0].strip()
+                title = book[1].split('/')[0].strip()
                 logging.debug("Book info: %s" % str(book))
-                xdate = book[8].split()[1].split('-')
+                xdate = book[4].split()[1].split('-')
                 year = xdate[2][0:2]
 		logging.debug("xdate %s year %s" % (xdate, year))
                 duedate = datetime.datetime(2000 + int(year), int(xdate[0]),
