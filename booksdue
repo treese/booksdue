@@ -92,6 +92,8 @@ class MlnFetcher(object):
         nocheckouts = False
         if (data.find('0 Items currently checked out') >= 0):
             nocheckouts = True
+        if (data.find('patFuncTitle">Reading History') >= 0):
+            nocheckouts = True
             
         if (data.find('the information you submitted was invalid') >= 0 ):
             return [(None, 'Bad account number or password')]
@@ -115,7 +117,6 @@ class MlnFetcher(object):
             parser.feed(input)
 
             if nocheckouts:
-                print len(parser.tabledata) - 2, "books requested"
                 return [(None, 'Nothing checked out')]
             for book in parser.tabledata[1:]:
                 title = book[1].split('/')[0].strip()
