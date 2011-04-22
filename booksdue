@@ -90,9 +90,11 @@ class MlnFetcher(object):
         # then punt.
 
         nocheckouts = False
-        if (data.find('0 Items currently checked out') >= 0):
+        if data.find('0 Items currently checked out') >= 0:
             nocheckouts = True
-        if (data.find('patFuncTitle">Reading History') >= 0):
+        if data.find('patFuncTitle">Reading History') >= 0:
+            nocheckouts = True
+        if data.find('buttonText">Pay') >= 0:
             nocheckouts = True
             
         if (data.find('the information you submitted was invalid') >= 0 ):
