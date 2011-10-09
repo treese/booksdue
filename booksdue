@@ -23,38 +23,38 @@ urlbase = "https://library.minlib.net"
 
 class MyTableParser(HTMLParser):
     def __init__(self):
-	self.intable = False
-	self.incell = False
-	self.inrow = False
+        self.intable = False
+        self.incell = False
+        self.inrow = False
         self.inspan = False
         self.label = False
         self.celldata = ''
-	self.rowdata = []
-	self.tabledata = []
-	HTMLParser.__init__(self)
+        self.rowdata = []
+        self.tabledata = []
+        HTMLParser.__init__(self)
     def handle_starttag(self, tag, attrs):
-	if tag == 'table':
-	    self.intable = True
-	elif tag == 'tr':
-	    self.inrow = True
-	elif tag == 'td':
-	    self.incell = True
+        if tag == 'table':
+            self.intable = True
+        elif tag == 'tr':
+            self.inrow = True
+        elif tag == 'td':
+            self.incell = True
         elif tag == 'span':
             self.inspan = True
         elif tag == 'label':
             self.label = True
     def handle_data(self, data):
-	if self.incell:
+        if self.incell:
             self.celldata = self.celldata + ' ' + data.strip()
     def handle_endtag(self, tag):
-	if tag == 'table':
-	    self.intable = False
-	elif tag == 'tr':
-	    self.inrow = False
-	    self.tabledata.append(self.rowdata)
-	    self.rowdata = []
-	elif tag == 'td':
-	    self.incell = False
+        if tag == 'table':
+            self.intable = False
+        elif tag == 'tr':
+            self.inrow = False
+            self.tabledata.append(self.rowdata)
+            self.rowdata = []
+        elif tag == 'td':
+            self.incell = False
             self.rowdata.append(self.celldata)
             self.celldata = ''
         elif tag == 'span':
@@ -64,12 +64,12 @@ class MyTableParser(HTMLParser):
 
 class MlnFetcher(object):
     def __init__(self, account, pin):
-	super(MlnFetcher, self).__init__()
-	self.account = account
-	self.pin = pin
+        super(MlnFetcher, self).__init__()
+        self.account = account
+        self.pin = pin
     def fetch(self):
-	br = mechanize.Browser()
-	br.set_handle_robots(False)	# Don't worry about robots.txt for this.
+        br = mechanize.Browser()
+        br.set_handle_robots(False)     # Don't worry about robots.txt for this.
         myurl = urlbase + "/patroninfo/"
         try:
             response = br.open(myurl)
@@ -77,13 +77,13 @@ class MlnFetcher(object):
             sys.stderr.write('Cannot open URL %s: %s' % (myurl, errmsg))
             sys.exit(-1)
             
-	assert br.viewing_html()
-	br.select_form(nr = 0)
-	br["code"] = self.account
-	br["pin"] = self.pin
+        assert br.viewing_html()
+        br.select_form(nr = 0)
+        br["code"] = self.account
+        br["pin"] = self.pin
 
-	response = br.submit()
-	data = response.read()
+        response = br.submit()
+        data = response.read()
         logging.debug(data)
 
         # If there are no books checked out, and there are fines,
@@ -107,12 +107,12 @@ class MlnFetcher(object):
             if match.group(1) != "0 requests (holds).":
                 print match.group(1)
 
-	# The HTML on this page isn't very good, so we pull out
-	# the important table with a regexp, and then parse the HTML.
+        # The HTML on this page isn't very good, so we pull out
+        # the important table with a regexp, and then parse the HTML.
 
-	match = re.search('\<table[^>]*patFunc".*</table>', data, re.DOTALL)
+        match = re.search('\<table[^>]*patFunc".*</table>', data, re.DOTALL)
         
-	booklist = []
+        booklist = []
         if match != None:
             parser = MyTableParser()
             input = match.group(0).replace("& ", "and ")
@@ -125,12 +125,12 @@ class MlnFetcher(object):
                 logging.debug("Book info: %s" % str(book))
                 xdate = book[4].split()[1].split('-')
                 year = xdate[2][0:2]
-		logging.debug("xdate %s year %s" % (xdate, year))
+                logging.debug("xdate %s year %s" % (xdate, year))
                 duedate = datetime.datetime(2000 + int(year), int(xdate[0]),
                                             int(xdate[1]))
-		logging.debug("Book parsed: %s %s" % (duedate, title))
+                logging.debug("Book parsed: %s %s" % (duedate, title))
                 booklist.append((duedate, title))
-	return booklist
+        return booklist
 
 # Config file is one account per line, no comments.
 # name account# pin
@@ -140,7 +140,7 @@ def read_config(filename, args):
     args = [x.lower() for x in args]
     f = open(filename)
     for x in f.readlines():
-	acct = x.split()
+        acct = x.split()
         if len(args) == 0 or acct[0].lower() in args:
             accounts.append(acct)
     return accounts
@@ -154,9 +154,9 @@ def compareDates(book1, book2):
     (duedate1, title1) = book1
     (duedate2, title2) = book2
     if duedate1 < duedate2:
-	return -1
+        return -1
     if duedate1 == duedate2:
-	return 0
+        return 0
     return 1
 
 def main():
@@ -165,14 +165,14 @@ def main():
     config = os.getenv("HOME") + "/" + defaultconfig
     cmdparser = OptionParser(usage)
     cmdparser.add_option("-c", "--config", type="string", dest="config",
-			help="Configuration file to use; default is ~/" +
-			defaultconfig, default=config)
+                        help="Configuration file to use; default is ~/" +
+                        defaultconfig, default=config)
     cmdparser.add_option("-d", "--by-date", action="store_true", dest="bydate",
                          help="Sort list by due date", default=True)
     cmdparser.add_option("-n", "--by-name", action="store_false", dest="bydate",
                          help="Sort list by name")
     cmdparser.add_option("-w", "--warn", type="int", dest="warndays",
-			help="Print warning for books due in N days", default=100)
+                        help="Print warning for books due in N days", default=100)
     cmdparser.add_option("-z", "--debug", action="store_true", dest="debug",
                          help="Enable debugging", default=False)
     
@@ -185,26 +185,26 @@ def main():
     
     accounts = read_config(options.config, args)
     for acct in accounts:
-	fetcher = MlnFetcher(acct[1], acct[2])
-	# Print by  name
-	print acct[0]
-	print "----------"
-	booklist = fetcher.fetch()
+        fetcher = MlnFetcher(acct[1], acct[2])
+        # Print by  name
+        print acct[0]
+        print "----------"
+        booklist = fetcher.fetch()
         logging.debug(booklist)
         if len(booklist) > 1:
             if options.bydate:
                 booklist.sort(compareDates)
             else:
                 booklist.sort(compareNames)
-	for book in booklist:
-	    (duedate,title) = book
+        for book in booklist:
+            (duedate,title) = book
             if duedate == None:
                 print title
             else:
                 now = datetime.datetime.today()
                 if duedate - now < datetime.timedelta(options.warndays):
                     print duedate.strftime('%m/%d/%Y'), title
-	print ""
+        print ""
 
 if __name__ == "__main__":
     main()
