@@ -1,4 +1,4 @@
-This python program prints a list of books checked out from the Minuteman Library Network.
+This Python program prints a list of books checked out from the Minuteman Library Network.
 It uses a file ~/.mln.conf with lines of the form:
 
    <tag> <account-number> <pin>
