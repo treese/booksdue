@@ -76,7 +76,7 @@ class MlnFetcher(object):
         except mechanize.URLError, (errno, errmsg):
             sys.stderr.write('Cannot open URL %s: %s' % (myurl, errmsg))
             sys.exit(-1)
-            
+
         assert br.viewing_html()
         br.select_form(nr = 0)
         br["code"] = self.account
@@ -90,13 +90,12 @@ class MlnFetcher(object):
         # then punt.
 
         nocheckouts = False
-        if data.find('0 Items currently checked out') >= 0:
+        if data.find('0 Items currently checked out') >= 0 \
+            or data.find('patFuncTitle">Reading History') >= 0 \
+            or data.find('buttonText">Pay') >= 0 \
+            or data.find('ITEMS CHECKED OUT') == -1:
             nocheckouts = True
-        if data.find('patFuncTitle">Reading History') >= 0:
-            nocheckouts = True
-        if data.find('buttonText">Pay') >= 0:
-            nocheckouts = True
-            
+
         if (data.find('the information you submitted was invalid') >= 0 ):
             return [(None, 'Bad account number or password')]
 
@@ -111,7 +110,7 @@ class MlnFetcher(object):
         # the important table with a regexp, and then parse the HTML.
 
         match = re.search('\<table[^>]*patFunc".*</table>', data, re.DOTALL)
-        
+
         booklist = []
         if match != None:
             parser = MyTableParser()
@@ -175,14 +174,14 @@ def main():
                         help="Print warning for books due in N days", default=100)
     cmdparser.add_option("-z", "--debug", action="store_true", dest="debug",
                          help="Enable debugging", default=False)
-    
+
     (options, args) = cmdparser.parse_args()
     if options.debug:
         logging.basicConfig(level=logging.DEBUG)
 
     # Print the base URL as a handy link to click on in an email.
     print "\n%s\n\n" % (urlbase)
-    
+
     accounts = read_config(options.config, args)
     for acct in accounts:
         fetcher = MlnFetcher(acct[1], acct[2])
