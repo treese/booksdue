@@ -8,7 +8,9 @@
 #
 # Last modified on Fri Apr  3 21:45:11 EDT 2009 by treese
 
-import  mechanize
+import mechanize
+from bs4 import BeautifulSoup
+
 from HTMLParser import HTMLParser
 from optparse import OptionParser
 import datetime
@@ -85,6 +87,10 @@ class MlnFetcher(object):
         response = br.submit()
         data = response.read()
         logging.debug(data)
+
+        soup = BeautifulSoup(data, "html5lib")
+
+
 
         # If there are no books checked out, and there are fines,
         # then punt.
