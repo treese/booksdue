@@ -1,3 +1,5 @@
+[This is an old program left here for reference. Since it was written, the MLN info has gotten better, and the web site got harder to scrape.]
+
 This Python program prints a list of books checked out from the Minuteman Library Network.
 It uses a file ~/.mln.conf with lines of the form:
 
